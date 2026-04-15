@@ -1,0 +1,426 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: #2e3348;
+  --text: #e2e4ed;
+  --muted: #5b6080;
+  --accent: #4f8ef7;
+  --green: #3ecf8e;
+  --red: #f74f4f;
+  --yellow: #f7c94f;
+  --purple: #b97af7;
+  --font: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+#mode-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.tab {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.tab.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.tab:hover:not(.active) {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: calc(100vh - 50px);
+  overflow-y: auto;
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+/* ── Panel ──────────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.panel-header h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.panel-body {
+  padding: 0.75rem 1rem;
+}
+
+/* ── Connection Panel ───────────────────────────────────────────────────── */
+.status {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 99px;
+  font-weight: 500;
+}
+
+.status.connected {
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--green);
+  border: 1px solid rgba(62, 207, 142, 0.3);
+}
+
+.status.disconnected {
+  background: rgba(91, 96, 128, 0.15);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.mode-section {
+  margin-bottom: 0.6rem;
+}
+
+.mode-section label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.hint {
+  font-size: 0.7rem;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+input[type="text"], input[type="checkbox"] {
+  font-family: var(--font);
+  font-size: 0.8rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+}
+
+textarea {
+  width: 100%;
+  padding: 0.35rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 0.8rem;
+}
+
+.fixture-meta {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  margin-right: 0.4rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-message {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+button {
+  font-family: var(--font);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+button.primary:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+button.secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+button.secondary:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button.small {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.55rem;
+}
+
+.toggle-btn {
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.72rem;
+}
+
+.toggle-btn.recording {
+  background: rgba(247, 79, 79, 0.15);
+  color: var(--red);
+  border-color: rgba(247, 79, 79, 0.4);
+}
+
+button.active {
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--green);
+  border-color: rgba(62, 207, 142, 0.4);
+}
+
+/* ── GATT Explorer ──────────────────────────────────────────────────────── */
+#gatt-tree {
+  font-size: 0.78rem;
+}
+
+.service-entry {
+  margin-bottom: 0.75rem;
+}
+
+.service-header {
+  padding: 0.3rem 0.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+}
+
+.char-list {
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.char-entry {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.char-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.char-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.uuid {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.char-uuid {
+  color: var(--text);
+}
+
+.badges {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.badge {
+  font-size: 0.65rem;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.badge-r { background: rgba(79, 142, 247, 0.2); color: var(--accent); }
+.badge-w { background: rgba(247, 201, 79, 0.2); color: var(--yellow); }
+.badge-n { background: rgba(62, 207, 142, 0.2); color: var(--green); }
+.badge-i { background: rgba(185, 122, 247, 0.2); color: var(--purple); }
+
+.read-value {
+  font-size: 0.72rem;
+  word-break: break-all;
+}
+
+.write-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  width: 100%;
+}
+
+.write-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.2rem 0.4rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-family: var(--font);
+}
+
+/* ── Log Area ───────────────────────────────────────────────────────────── */
+.log-area {
+  height: 220px;
+  overflow-y: auto;
+  font-size: 0.72rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem 0.5rem;
+  scroll-behavior: smooth;
+}
+
+.log-row {
+  display: grid;
+  grid-template-columns: 5.5rem 6rem 5rem 1fr;
+  gap: 0.5rem;
+  padding: 0.1rem 0;
+  border-bottom: 1px solid rgba(46, 51, 72, 0.4);
+}
+
+.log-row:last-child {
+  border-bottom: none;
+}
+
+.log-time {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.log-op {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.log-char {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.log-data {
+  color: var(--text);
+  word-break: break-all;
+  font-size: 0.68rem;
+  opacity: 0.85;
+}
+
+.op-read    { color: var(--accent); }
+.op-write   { color: var(--yellow); }
+.op-notify  { color: var(--green); }
+.op-discover { color: var(--muted); }
+.op-event   { color: var(--purple); }
+.op-other   { color: var(--text); }
+
+/* ── Utilities ──────────────────────────────────────────────────────────── */
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
