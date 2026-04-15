@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BLE Capture Tool</title>
+    <script type="module" crossorigin src="/ble-capture-tool/assets/index-CGnEV6nZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/ble-capture-tool/assets/index-BrOArlO5.css">
+  </head>
+  <body>
+    <header>
+      <h1>BLE Capture Tool</h1>
+      <nav id="mode-tabs">
+        <button id="tab-capture" class="tab active" data-mode="capture">Capture</button>
+        <button id="tab-fixture" class="tab" data-mode="fixture">Fixture</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Connection Panel -->
+      <section id="connection-panel" class="panel">
+        <div class="panel-header">
+          <h2>Connection</h2>
+          <span id="connection-status" class="status disconnected">Disconnected</span>
+        </div>
+        <div class="panel-body">
+          <div id="capture-options" class="mode-section">
+            <label for="extra-services">Optional Service UUIDs <span class="hint">(comma-separated, leave blank to use all known)</span></label>
+            <input type="text" id="extra-services" placeholder="e.g. 0000aadb-..., 6e400001-..." />
+          </div>
+          <div id="fixture-options" class="mode-section hidden">
+            <label>
+              <input type="checkbox" id="fixture-any-mode" />
+              Accept all devices (bypass name filters)
+            </label>
+            <label>
+              <input type="checkbox" id="fixture-record-from-connect" checked />
+              Record from connect <span class="hint">(recommended for fixtures; captures protocol init)</span>
+            </label>
+            <div class="fixture-meta">
+              <label for="fixture-scenario">Scenario <span class="hint">(optional label for this capture)</span></label>
+              <input type="text" id="fixture-scenario" placeholder="e.g. scramble + 10 moves + battery probe" />
+              <label for="fixture-notes">Notes <span class="hint">(optional)</span></label>
+              <textarea id="fixture-notes" rows="2" placeholder="Anything useful for replay/debugging (MAC quirks, steps, etc.)"></textarea>
+            </div>
+          </div>
+          <div class="row">
+            <button id="btn-connect" class="primary">Connect</button>
+            <button id="btn-disconnect" class="secondary hidden">Disconnect</button>
+          </div>
+          <div id="status-message" class="status-message hidden"></div>
+        </div>
+      </section>
+
+      <!-- GATT Explorer (capture mode only) -->
+      <section id="gatt-panel" class="panel hidden">
+        <div class="panel-header">
+          <h2>GATT Explorer</h2>
+        </div>
+        <div class="panel-body">
+          <div id="gatt-tree">
+            <span class="muted">No services discovered.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Traffic Log -->
+      <section id="traffic-panel" class="panel">
+        <div class="panel-header">
+          <h2>Traffic Log</h2>
+          <div class="panel-actions">
+            <button id="btn-record" class="toggle-btn" title="Start / stop recording">&#9679; Record</button>
+            <button id="btn-clear-traffic" class="secondary small">Clear</button>
+            <button id="btn-export" class="primary small" disabled>Export</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="traffic-log" class="log-area">
+            <span class="muted">Connect to a device to start capturing.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Events Log (fixture mode only) -->
+      <section id="events-panel" class="panel hidden">
+        <div class="panel-header">
+          <h2>Decoded Events</h2>
+          <div class="panel-actions">
+            <button id="btn-clear-events" class="secondary small">Clear</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="events-log" class="log-area">
+            <span class="muted">Connect via Fixture mode to see decoded events.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Fixture probes (fixture mode only) -->
+      <section id="fixture-probes-panel" class="panel hidden">
+        <div class="panel-header">
+          <h2>Fixture Probes</h2>
+          <div class="panel-actions">
+            <button id="btn-probe-battery" class="secondary small" disabled>Battery</button>
+            <button id="btn-probe-hardware" class="secondary small" disabled>Hardware</button>
+            <button id="btn-probe-facelets" class="secondary small" disabled>Facelets</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="muted">
+            Use these to generate deterministic, labeled traffic segments (captured as markers + BLE ops).
+          </div>
+        </div>
+      </section>
+    </main>
+
+  </body>
+</html>
