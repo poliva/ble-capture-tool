@@ -7,6 +7,12 @@ This tool has two modes:
 - **Capture**: raw GATT exploration and traffic capture.
 - **Fixture**: connects via `smartcube-web-bluetooth`, records BLE traffic plus decoded cube events, and exports a `smartcube-fixture` JSON.
 
+## Capturing a new cube
+
+Capture mode starts recording before GATT discovery. Connecting alone does not enable notifications: click **Subscribe** on the characteristic marked **N** or **I**, then turn the cube and export the capture. Reads and writes are recorded too.
+
+Raw Capture mode does not send the encrypted initialization commands. If subscribed notifications stay silent, try **Fixture** mode to run the existing handshakes. Candidates must pass the encrypted probe; manual entry may still be needed. Name matching does not establish protocol compatibility: export a short capture with known turns and the starting state before adapting the decoder.
+
 ## Recommended workflow for high-quality fixtures
 
 - **Use Fixture mode**.
@@ -35,6 +41,8 @@ In the GATT explorer:
 - Any per-characteristic **Read** action adds a marker like `gatt:read:0xXXXX`.
 
 ## Export warnings
+
+Export is available as soon as traffic is recorded, including after a failed connection or disconnect. If Fixture mode never completes verification, the export is a raw `ble-capture` with the discovered device name and traffic; a verified connection exports a `smartcube-fixture`.
 
 On fixture export, the tool warns about common capture problems:
 

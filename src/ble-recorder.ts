@@ -1,4 +1,4 @@
-import type { TrafficEntry, TrafficOp, FixtureEvent } from './types.ts';
+import type { TrafficEntry, TrafficOp, FixtureEvent, DeviceInfo } from './types.ts';
 
 export type RecorderListener = (entry: TrafficEntry) => void;
 export type EventListener = (entry: FixtureEvent) => void;
@@ -11,6 +11,7 @@ export function bufToHex(buf: ArrayBuffer | DataView): string {
 }
 
 export class BleRecorder {
+    deviceInfo: DeviceInfo | null = null;
     private traffic: TrafficEntry[] = [];
     private cubeEvents: FixtureEvent[] = [];
     private startTime: number | null = null;

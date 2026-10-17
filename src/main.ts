@@ -15,6 +15,7 @@ const recorder = new BleRecorder();
 let captureDevice: BluetoothDevice | null = null;
 let captureServices: GattServiceSnapshot[] = [];
 let fixtureConn: SmartCubeConnection | null = null;
+let lastFixtureConn: SmartCubeConnection | null = null;
 let fixtureServices: GattServiceSnapshot[] = [];
 
 // ─── DOM refs ─────────────────────────────────────────────────────────────────
@@ -144,6 +145,7 @@ btnConnect.addEventListener('click', async () => {
         return;
     }
     btnConnect.disabled = true;
+    lastFixtureConn = null;
     setStatus('');
     try {
         if (mode === 'capture') {
@@ -153,6 +155,7 @@ btnConnect.addEventListener('click', async () => {
                     captureDevice = device;
                     captureServices = [];
                     setConnected(device.name ?? device.id);
+                    updateRecordBtn();
                 },
                 onDisconnected: () => {
                     setDisconnected();
@@ -170,6 +173,7 @@ btnConnect.addEventListener('click', async () => {
                 recordFromConnect: fixtureRecordFromConnect.checked,
                 onConnected: (conn) => {
                     fixtureConn = conn;
+                    lastFixtureConn = conn;
                     fixtureServices = [];
                     setConnected(conn.deviceName);
                     updateProbeButtons();
@@ -187,6 +191,7 @@ btnConnect.addEventListener('click', async () => {
         }
     } finally {
         btnConnect.disabled = false;
+        updateRecordBtn();
     }
 });
 
@@ -221,6 +226,7 @@ btnClearTraffic.addEventListener('click', () => {
     trafficLog.clear();
     eventsLog.clear();
     btnExport.disabled = !captureDevice && !fixtureConn;
+    lastFixtureConn = fixtureConn;
 });
 
 btnClearEvents.addEventListener('click', () => {
@@ -231,7 +237,7 @@ btnExport.addEventListener('click', () => {
     if (mode === 'capture' && captureDevice) {
         const session = buildCaptureSession(captureDevice, captureServices, recorder);
         exportCapture(session);
-    } else if (mode === 'fixture' && fixtureConn) {
+    } else if (mode === 'fixture' && (fixtureConn || lastFixtureConn)) {
         const traffic = recorder.getTraffic();
         const events = recorder.getCubeEvents();
 
@@ -252,14 +258,24 @@ btnExport.addEventListener('click', () => {
             if (!ok) return;
         }
 
-        const session = buildFixtureSession(fixtureConn, fixtureServices, recorder, {
+        const session = buildFixtureSession((fixtureConn || lastFixtureConn)!, fixtureServices, recorder, {
             scenario: fixtureScenario.value.trim() || undefined,
             notes: fixtureNotes.value.trim() || undefined,
         });
         exportFixture(session);
+    } else if (recorder.getTraffic().length > 0) {
+        // Verification may fail even though valuable raw traffic was captured.
+        // Preserve it as a raw capture, without claiming a verified protocol.
+        exportCapture({
+            format: 'ble-capture',
+            version: 1,
+            capturedAt: new Date().toISOString(),
+            device: recorder.deviceInfo ?? { name: 'unknown', id: '' },
+            services: mode === 'capture' ? captureServices : [],
+            traffic: recorder.getTraffic(),
+        });
     } else {
-        // Export whatever we have even if disconnected
-        setStatus('Connect to a device first to export session data.');
+        setStatus('No traffic to export.');
     }
 });
 
@@ -299,6 +315,8 @@ btnProbeFacelets.addEventListener('click', async () => {
 // ─── Recorder listeners ───────────────────────────────────────────────────────
 recorder.onTraffic((entry) => {
     trafficLog.addTrafficEntry(entry);
+    updateRecordBtn();
+    btnExport.disabled = false;
 });
 
 recorder.onEvent((entry) => {

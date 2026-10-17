@@ -182,13 +182,16 @@ export async function renderGattExplorer(
                 const notifHandler = (): void => { /* handled by interceptor or recorder */ };
                 btn.addEventListener('click', async () => {
                     if (!subscribed) {
+                        ensureRecording(opts.recorder, `gatt:subscribe:${shortUuid(char.uuid)}`);
+                        // Attach before enabling notifications so early packets are captured.
+                        char.addEventListener('characteristicvaluechanged', notifHandler);
                         try {
                             await char.startNotifications();
-                            char.addEventListener('characteristicvaluechanged', notifHandler);
                             btn.textContent = 'Unsubscribe';
                             btn.classList.add('active');
                             subscribed = true;
                         } catch (e) {
+                            char.removeEventListener('characteristicvaluechanged', notifHandler);
                             alert(`Subscribe error: ${e instanceof Error ? e.message : String(e)}`);
                         }
                     } else {
@@ -227,6 +230,7 @@ export async function renderGattExplorer(
                         bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
                     }
                     btn.disabled = true;
+                    ensureRecording(opts.recorder, `gatt:write:${shortUuid(char.uuid)}`);
                     try {
                         if (char.properties.write) {
                             await char.writeValueWithResponse(bytes);

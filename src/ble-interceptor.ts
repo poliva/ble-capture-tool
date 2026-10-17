@@ -12,6 +12,7 @@ interface Originals {
     charWriteWithoutResponse: AnyFn;
     charStartNotifications: AnyFn;
     charAddEventListener: AnyFn;
+    charRemoveEventListener: AnyFn;
     serverGetPrimaryService: AnyFn;
     serverGetPrimaryServices: AnyFn;
     serviceGetCharacteristic: AnyFn;
@@ -46,7 +47,7 @@ function getServiceUuid(char: BluetoothRemoteGATTCharacteristic): string {
     }
 }
 
-const wrapperMap = new WeakMap<AnyFn, AnyFn>();
+const wrapperMap = new WeakMap<BluetoothRemoteGATTCharacteristic, WeakMap<AnyFn, AnyFn>>();
 
 export function installInterceptors(recorder: BleRecorder): void {
     if (originals !== null) return;
@@ -66,6 +67,7 @@ export function installInterceptors(recorder: BleRecorder): void {
         charWriteWithoutResponse: charProto.writeValueWithoutResponse,
         charStartNotifications: charProto.startNotifications,
         charAddEventListener: charProto.addEventListener,
+        charRemoveEventListener: charProto.removeEventListener,
         serverGetPrimaryService: serverProto.getPrimaryService,
         serverGetPrimaryServices: serverProto.getPrimaryServices,
         serviceGetCharacteristic: serviceProto.getCharacteristic,
@@ -103,7 +105,12 @@ export function installInterceptors(recorder: BleRecorder): void {
             const serviceUuid = getServiceUuid(this);
             const charUuid = this.uuid;
             const original = listener as (ev: Event) => void;
-            const wrapped = (ev: Event): void => {
+            let wrappers = wrapperMap.get(this);
+            if (!wrappers) {
+                wrappers = new WeakMap<AnyFn, AnyFn>();
+                wrapperMap.set(this, wrappers);
+            }
+            const wrapped = wrappers.get(original as AnyFn) ?? ((ev: Event): void => {
                 const char = ev.target as BluetoothRemoteGATTCharacteristic;
                 if (char.value) {
                     const copy = char.value.buffer.slice(
@@ -113,20 +120,34 @@ export function installInterceptors(recorder: BleRecorder): void {
                     recorder.addTrafficEntry('notify', serviceUuid, charUuid, copy);
                 }
                 original(ev);
-            };
-            wrapperMap.set(original as AnyFn, wrapped as AnyFn);
+            });
+            wrappers.set(original as AnyFn, wrapped as AnyFn);
             return originals!.charAddEventListener.call(this, type, wrapped, options);
         }
         return originals!.charAddEventListener.apply(this, [type, listener, options]);
     };
 
+    charProto.removeEventListener = function (
+        this: BluetoothRemoteGATTCharacteristic,
+        type: string,
+        listener: unknown,
+        options?: unknown,
+    ) {
+        const wrapped = type === 'characteristicvaluechanged' && typeof listener === 'function'
+            ? wrapperMap.get(this)?.get(listener as AnyFn)
+            : undefined;
+        return originals!.charRemoveEventListener.call(this, type, wrapped ?? listener, options);
+    };
+
     serverProto.getPrimaryService = async function (this: BluetoothRemoteGATTServer, service: BluetoothServiceUUID, ...rest: unknown[]) {
+        recorder.deviceInfo = { name: this.device.name ?? this.device.id, id: this.device.id };
         const result = await originals!.serverGetPrimaryService.apply(this, [service, ...rest]);
         recorder.addTrafficEntry('discover-service', String(service), undefined, undefined);
         return result;
     };
 
     serverProto.getPrimaryServices = async function (this: BluetoothRemoteGATTServer, ...args: unknown[]) {
+        recorder.deviceInfo = { name: this.device.name ?? this.device.id, id: this.device.id };
         const results = await originals!.serverGetPrimaryServices.apply(this, args) as BluetoothRemoteGATTService[];
         for (const svc of results) {
             recorder.addTrafficEntry('discover-service', svc.uuid, undefined, undefined);
@@ -162,6 +183,7 @@ export function removeInterceptors(): void {
         charProto.writeValueWithoutResponse = originals.charWriteWithoutResponse;
         charProto.startNotifications = originals.charStartNotifications;
         charProto.addEventListener = originals.charAddEventListener;
+        charProto.removeEventListener = originals.charRemoveEventListener;
     }
     if (serverProto) {
         serverProto.getPrimaryService = originals.serverGetPrimaryService;

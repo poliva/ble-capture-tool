@@ -1,6 +1,7 @@
 import type { BleRecorder } from './ble-recorder.ts';
 import type { GattServiceSnapshot, CaptureSession, DeviceInfo } from './types.ts';
 import { renderGattExplorer } from './gatt-explorer.ts';
+import { installInterceptors, removeInterceptors } from './ble-interceptor.ts';
 
 // Known smartcube service UUIDs from supported protocols (full 128-bit format required by Chrome)
 const KNOWN_SERVICES = [
@@ -16,6 +17,7 @@ const KNOWN_SERVICES = [
     // MoYu
     '00001000-0000-1000-8000-00805f9b34fb',
     '0783b03e-8535-b5a0-7140-a304d2495cb7',
+    '0783b03e-7735-b5a0-1760-a305d2795cb0', // Modern MoYu / WCU (MoYu32)
     // QiYi
     '0000fff0-0000-1000-8000-00805f9b34fb',
     // Generic BLE standard services
@@ -68,15 +70,23 @@ export async function connectCaptureMode(
         return null;
     }
 
+    // Capture discovery as well as reads, writes and subscribed notifications.
+    installInterceptors(recorder);
+    const startedRecording = !recorder.isRecording;
+    if (startedRecording) recorder.startRecording();
+
     onStatus('Connecting to GATT server…');
     try {
         await device.gatt!.connect();
     } catch (e) {
+        if (startedRecording) recorder.stopRecording();
+        removeInterceptors();
         onStatus(`GATT connect failed: ${e instanceof Error ? e.message : String(e)}`);
         return null;
     }
 
     device.addEventListener('gattserverdisconnected', () => {
+        removeInterceptors();
         onDisconnected();
     });
 
