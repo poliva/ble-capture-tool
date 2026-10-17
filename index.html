@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BLE Capture Tool</title>
-    <script type="module" crossorigin src="/ble-capture-tool/assets/index-BwYMMR83.js"></script>
+    <script type="module" crossorigin src="/ble-capture-tool/assets/index-ld4IzlFa.js"></script>
     <link rel="stylesheet" crossorigin href="/ble-capture-tool/assets/index-BrOArlO5.css">
   </head>
   <body>
@@ -61,6 +61,24 @@
           <div id="gatt-tree">
             <span class="muted">No services discovered.</span>
           </div>
+          <p class="muted">Recording starts on connect. Click Subscribe on a notification (N/I) characteristic to capture updates. Some cubes require protocol initialization before sending turns or orientation; Fixture mode performs the supported protocol's initialization.</p>
+        </div>
+      </section>
+
+      <!-- Fixture probes (fixture mode only) -->
+      <section id="fixture-probes-panel" class="panel hidden">
+        <div class="panel-header">
+          <h2>Fixture Probes</h2>
+          <div class="panel-actions">
+            <button id="btn-probe-battery" class="secondary small" disabled>Battery</button>
+            <button id="btn-probe-hardware" class="secondary small" disabled>Hardware</button>
+            <button id="btn-probe-facelets" class="secondary small" disabled>Facelets</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="muted">
+            Request the current battery, hardware details, or facelet state. Each request is marked in the recording.
+          </div>
         </div>
       </section>
 
@@ -96,22 +114,6 @@
         </div>
       </section>
 
-      <!-- Fixture probes (fixture mode only) -->
-      <section id="fixture-probes-panel" class="panel hidden">
-        <div class="panel-header">
-          <h2>Fixture Probes</h2>
-          <div class="panel-actions">
-            <button id="btn-probe-battery" class="secondary small" disabled>Battery</button>
-            <button id="btn-probe-hardware" class="secondary small" disabled>Hardware</button>
-            <button id="btn-probe-facelets" class="secondary small" disabled>Facelets</button>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="muted">
-            Use these to generate deterministic, labeled traffic segments (captured as markers + BLE ops).
-          </div>
-        </div>
-      </section>
     </main>
 
   </body>
